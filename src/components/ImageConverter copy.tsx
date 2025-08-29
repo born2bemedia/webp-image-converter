@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import JSZip from 'jszip';
 
 interface ConversionResult {
   originalName: string;
@@ -28,7 +27,6 @@ export default function ImageConverter() {
   const [result, setResult] = useState<BatchConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [downloadMode, setDownloadMode] = useState<'individual' | 'zip'>('individual');
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,39 +47,6 @@ export default function ImageConverter() {
     }
   };
 
-  const convertToWebP = async (file: File): Promise<{ blob: Blob; originalSize: number; convertedSize: number }> => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx?.drawImage(img, 0, 0);
-        
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve({
-                blob,
-                originalSize: file.size,
-                convertedSize: blob.size
-              });
-            } else {
-              reject(new Error('Failed to convert to WebP'));
-            }
-          },
-          'image/webp',
-          quality / 100
-        );
-      };
-      
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
   const handleConvert = async () => {
     if (selectedFiles.length === 0) return;
 
@@ -90,54 +55,28 @@ export default function ImageConverter() {
     setConversionProgress(0);
 
     try {
-      const results: (ConversionResult | { originalName: string; error: string })[] = [];
-      let successfulConversions = 0;
-      let failedConversions = 0;
-
       if (downloadMode === 'zip') {
-        // Create ZIP archive
-        const zip = new JSZip();
-        
-        for (let i = 0; i < selectedFiles.length; i++) {
-          const file = selectedFiles[i];
-          
-          try {
-            const { blob, originalSize, convertedSize } = await convertToWebP(file);
-            
-            const originalName = file.name.replace(/\.[^/.]+$/, '');
-            const fileName = `${originalName}.webp`;
-            
-            // Add file to ZIP
-            zip.file(fileName, blob);
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+          formData.append('files', file);
+        });
+        formData.append('quality', quality.toString());
 
-            results.push({
-              originalName: file.name,
-              fileName,
-              originalSize,
-              convertedSize,
-              compressionRatio: ((originalSize - convertedSize) / originalSize) * 100,
-              webpBuffer: '' // Not needed for client-side
-            });
-            
-            successfulConversions++;
-          } catch (error) {
-            results.push({
-              originalName: file.name,
-              error: error instanceof Error ? error.message : 'Conversion error'
-            });
-            failedConversions++;
-          }
+        const response = await fetch('/api/convert-zip', {
+          method: 'POST',
+          body: formData,
+        });
 
-          // Update progress
-          setConversionProgress(((i + 1) / selectedFiles.length) * 100);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error creating ZIP archive');
         }
 
-        // Generate and download ZIP
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const blob = await response.blob();
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
         const zipFileName = `webp-conversion-${timestamp}.zip`;
         
-        const url = window.URL.createObjectURL(zipBlob);
+        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = zipFileName;
@@ -146,57 +85,50 @@ export default function ImageConverter() {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
 
+        setResult({
+          success: true,
+          results: [],
+          totalFiles: selectedFiles.length,
+          successfulConversions: selectedFiles.length,
+          failedConversions: 0
+        });
+
       } else {
-        // Individual downloads
-        for (let i = 0; i < selectedFiles.length; i++) {
-          const file = selectedFiles[i];
-          
-          try {
-            const { blob, originalSize, convertedSize } = await convertToWebP(file);
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+          formData.append('files', file);
+        });
+        formData.append('quality', quality.toString());
+
+        const response = await fetch('/api/convert', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Conversion error');
+        }
+
+        const resultData: BatchConversionResult = await response.json();
+        setResult(resultData);
+
+        resultData.results.forEach((fileResult, index) => {
+          if (!('error' in fileResult)) {
+            const webpBuffer = Buffer.from(fileResult.webpBuffer, 'base64');
+            const blob = new Blob([webpBuffer], { type: 'image/webp' });
             
-            const originalName = file.name.replace(/\.[^/.]+$/, '');
-            const fileName = `${originalName}.webp`;
-            
-            // Download the file
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = fileName;
+            a.download = fileResult.fileName;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-
-            results.push({
-              originalName: file.name,
-              fileName,
-              originalSize,
-              convertedSize,
-              compressionRatio: ((originalSize - convertedSize) / originalSize) * 100,
-              webpBuffer: '' // Not needed for client-side
-            });
-            
-            successfulConversions++;
-          } catch (error) {
-            results.push({
-              originalName: file.name,
-              error: error instanceof Error ? error.message : 'Conversion error'
-            });
-            failedConversions++;
           }
-
-          // Update progress
-          setConversionProgress(((i + 1) / selectedFiles.length) * 100);
-        }
+        });
       }
-
-      setResult({
-        success: true,
-        results,
-        totalFiles: selectedFiles.length,
-        successfulConversions,
-        failedConversions
-      });
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion error');
@@ -266,7 +198,7 @@ export default function ImageConverter() {
             WebP Image Converter
           </h1>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Convert images to optimized WebP format locally in your browser - no server limits!
+            Convert large numbers of images to optimized WebP format with incredible speed and quality
           </p>
         </div>
 
@@ -314,14 +246,6 @@ export default function ImageConverter() {
                   <p className="text-gray-300 mb-6">
                     Drag files here or click to select
                   </p>
-                  <div className="mb-4 p-3 bg-blue-900/30 border border-blue-700/50 rounded-xl">
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-blue-300 text-sm font-medium">Processing happens locally - no file size limits!</span>
-                    </div>
-                  </div>
                   <div className="flex items-center justify-center space-x-4 text-sm text-gray-400 mb-8">
                     <span className="flex items-center">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
@@ -539,19 +463,14 @@ export default function ImageConverter() {
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Converting {selectedFiles.length} files...</span>
                   </div>
-                                 ) : (
-                   <div className="flex items-center justify-center space-x-3">
-                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                     </svg>
-                     <span>
-                       {downloadMode === 'zip' 
-                         ? `Convert ${selectedFiles.length} files to WebP (ZIP)`
-                         : `Convert ${selectedFiles.length} files to WebP`
-                       }
-                     </span>
-                   </div>
-                 )}
+                ) : (
+                  <div className="flex items-center justify-center space-x-3">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Convert {selectedFiles.length} files to WebP</span>
+                  </div>
+                )}
               </button>
             </div>
           </div>
@@ -632,12 +551,12 @@ export default function ImageConverter() {
                 </div>
               )}
               
-                             <p className="text-green-400 font-medium">
-                 {downloadMode === 'zip' 
-                   ? 'ZIP archive with all converted files has been downloaded to your computer.'
-                   : 'All successfully converted files have been automatically downloaded to your computer.'
-                 }
-               </p>
+              <p className="text-green-400 font-medium">
+                {downloadMode === 'zip' 
+                  ? 'ZIP archive with all converted files has been downloaded to your computer.'
+                  : 'All successfully converted files have been automatically downloaded to your computer.'
+                }
+              </p>
             </div>
           </div>
         )}
