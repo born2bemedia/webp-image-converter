@@ -36,7 +36,7 @@ export default function ImageConverter() {
       const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
       
       if (invalidFiles.length > 0) {
-        setError(`Непідтримувані формати файлів: ${invalidFiles.map(f => f.name).join(', ')}. Підтримуються тільки JPEG, JPG та PNG`);
+        setError(`Unsupported file formats: ${invalidFiles.map(f => f.name).join(', ')}. Only JPEG, JPG and PNG are supported`);
         return;
       }
       
@@ -69,7 +69,7 @@ export default function ImageConverter() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Помилка створення ZIP архіву');
+          throw new Error(errorData.error || 'Error creating ZIP archive');
         }
 
         const blob = await response.blob();
@@ -107,7 +107,7 @@ export default function ImageConverter() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Помилка конвертації');
+          throw new Error(errorData.error || 'Conversion error');
         }
 
         const resultData: BatchConversionResult = await response.json();
@@ -131,7 +131,7 @@ export default function ImageConverter() {
       }
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Помилка конвертації');
+      setError(err instanceof Error ? err.message : 'Conversion error');
     } finally {
       setIsConverting(false);
       setConversionProgress(0);
@@ -158,7 +158,7 @@ export default function ImageConverter() {
       const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
       
       if (invalidFiles.length > 0) {
-        setError(`Непідтримувані формати файлів: ${invalidFiles.map(f => f.name).join(', ')}. Підтримуються тільки JPEG, JPG та PNG`);
+        setError(`Unsupported file formats: ${invalidFiles.map(f => f.name).join(', ')}. Only JPEG, JPG and PNG are supported`);
         return;
       }
       
@@ -198,7 +198,7 @@ export default function ImageConverter() {
             WebP Image Converter
           </h1>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Конвертуйте велику кількість зображень у оптимізований WebP формат з неймовірною швидкістю та якістю
+            Convert large numbers of images to optimized WebP format with incredible speed and quality
           </p>
         </div>
 
@@ -241,10 +241,10 @@ export default function ImageConverter() {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">
-                    Завантажте ваші зображення
+                    Upload your images
                   </h3>
                   <p className="text-gray-300 mb-6">
-                    Перетягніть файли сюди або натисніть для вибору
+                    Drag files here or click to select
                   </p>
                   <div className="flex items-center justify-center space-x-4 text-sm text-gray-400 mb-8">
                     <span className="flex items-center">
@@ -267,7 +267,7 @@ export default function ImageConverter() {
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Вибрати файли
+                    Select Files
                   </button>
                 </div>
               </div>
@@ -282,23 +282,23 @@ export default function ImageConverter() {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">
-                    {selectedFiles.length} файлів готово
+                    {selectedFiles.length} files ready
                   </h3>
                   <p className="text-gray-300 mb-4">
-                    Загальний розмір: <span className="font-semibold text-blue-400">{formatFileSize(getTotalSize())}</span>
+                    Total size: <span className="font-semibold text-blue-400">{formatFileSize(getTotalSize())}</span>
                   </p>
                   <div className="flex gap-3 justify-center">
                     <button
                       onClick={clearAllFiles}
                       className="px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors duration-200 shadow-lg"
                     >
-                      Очистити
+                      Clear All
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="px-6 py-3 bg-gray-700 text-white font-medium rounded-xl hover:bg-gray-600 transition-colors duration-200 shadow-lg"
                     >
-                      Додати ще
+                      Add More
                     </button>
                   </div>
                 </div>
@@ -312,10 +312,10 @@ export default function ImageConverter() {
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-700/20">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">
-                Вибрані файли
+                Selected Files
               </h3>
               <span className="px-4 py-2 bg-blue-900/50 text-blue-300 font-semibold rounded-full text-sm border border-blue-700/50">
-                {selectedFiles.length} файлів
+                {selectedFiles.length} files
               </span>
             </div>
             <div className="max-h-80 overflow-y-auto space-y-3 custom-scrollbar">
@@ -350,13 +350,13 @@ export default function ImageConverter() {
         {selectedFiles.length > 0 && (
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-700/20">
             <h3 className="text-xl font-bold text-white mb-6">
-              Налаштування конвертації
+              Conversion Settings
             </h3>
             <div className="space-y-8">
               {/* Download Mode */}
               <div>
                 <label className="block text-lg font-semibold text-gray-200 mb-4">
-                  Режим завантаження
+                  Download Mode
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className={`relative cursor-pointer group ${
@@ -385,8 +385,8 @@ export default function ImageConverter() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-white">Окремі файли</h4>
-                          <p className="text-sm text-gray-400">{selectedFiles.length} завантажень</p>
+                          <h4 className="font-semibold text-white">Individual Files</h4>
+                          <p className="text-sm text-gray-400">{selectedFiles.length} downloads</p>
                         </div>
                       </div>
                     </div>
@@ -418,8 +418,8 @@ export default function ImageConverter() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-white">ZIP архів</h4>
-                          <p className="text-sm text-gray-400">1 завантаження</p>
+                          <h4 className="font-semibold text-white">ZIP Archive</h4>
+                          <p className="text-sm text-gray-400">1 download</p>
                         </div>
                       </div>
                     </div>
@@ -430,7 +430,7 @@ export default function ImageConverter() {
               {/* Quality Slider */}
               <div>
                 <label className="block text-lg font-semibold text-gray-200 mb-4">
-                  Якість WebP: <span className="text-blue-400">{quality}%</span>
+                  WebP Quality: <span className="text-blue-400">{quality}%</span>
                 </label>
                 <div className="relative">
                   <input
@@ -442,8 +442,8 @@ export default function ImageConverter() {
                     className="w-full h-3 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full appearance-none cursor-pointer slider"
                   />
                   <div className="flex justify-between text-sm text-gray-400 mt-2">
-                    <span>Висока компресія</span>
-                    <span>Висока якість</span>
+                    <span>High compression</span>
+                    <span>High quality</span>
                   </div>
                 </div>
               </div>
@@ -461,14 +461,14 @@ export default function ImageConverter() {
                 {isConverting ? (
                   <div className="flex items-center justify-center space-x-3">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Конвертуємо {selectedFiles.length} файлів...</span>
+                    <span>Converting {selectedFiles.length} files...</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center space-x-3">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <span>Конвертувати {selectedFiles.length} файлів у WebP</span>
+                    <span>Convert {selectedFiles.length} files to WebP</span>
                   </div>
                 )}
               </button>
@@ -481,7 +481,7 @@ export default function ImageConverter() {
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-700/20">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-white">Конвертація в процесі...</span>
+                <span className="text-lg font-semibold text-white">Conversion in progress...</span>
                 <span className="text-blue-400 font-bold">{conversionProgress}%</span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
@@ -518,27 +518,27 @@ export default function ImageConverter() {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-white">
-                Конвертація завершена! 🎉
+                Conversion completed! 🎉
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 p-6 rounded-2xl border border-blue-700/30">
                   <div className="text-3xl font-bold text-blue-400 mb-2">{result.totalFiles}</div>
-                  <div className="text-gray-300">Всього файлів</div>
+                  <div className="text-gray-300">Total files</div>
                 </div>
                 <div className="bg-gradient-to-br from-green-900/50 to-green-800/30 p-6 rounded-2xl border border-green-700/30">
                   <div className="text-3xl font-bold text-green-400 mb-2">{result.successfulConversions}</div>
-                  <div className="text-gray-300">Успішно конвертовано</div>
+                  <div className="text-gray-300">Successfully converted</div>
                 </div>
                 <div className="bg-gradient-to-br from-red-900/50 to-red-800/30 p-6 rounded-2xl border border-red-700/30">
                   <div className="text-3xl font-bold text-red-400 mb-2">{result.failedConversions}</div>
-                  <div className="text-gray-300">Помилок</div>
+                  <div className="text-gray-300">Errors</div>
                 </div>
               </div>
               
               {result.failedConversions > 0 && (
                 <div className="bg-red-900/30 rounded-2xl p-6 border border-red-700/30">
-                  <h4 className="font-semibold text-red-300 mb-3">Файли з помилками:</h4>
+                  <h4 className="font-semibold text-red-300 mb-3">Files with errors:</h4>
                   <div className="space-y-2">
                     {result.results
                       .filter(r => 'error' in r)
@@ -553,8 +553,8 @@ export default function ImageConverter() {
               
               <p className="text-green-400 font-medium">
                 {downloadMode === 'zip' 
-                  ? 'ZIP архів з усіма конвертованими файлами було завантажено на ваш комп\'ютер.'
-                  : 'Всі успішно конвертовані файли були автоматично завантажені на ваш комп\'ютер.'
+                  ? 'ZIP archive with all converted files has been downloaded to your computer.'
+                  : 'All successfully converted files have been automatically downloaded to your computer.'
                 }
               </p>
             </div>
