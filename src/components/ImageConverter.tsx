@@ -22,7 +22,7 @@ interface BatchConversionResult {
 
 export default function ImageConverter() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [quality, setQuality] = useState(80);
+  const [quality, setQuality] = useState(90);
   const [isConverting, setIsConverting] = useState(false);
   const [conversionProgress, setConversionProgress] = useState(0);
   const [result, setResult] = useState<BatchConversionResult | null>(null);
