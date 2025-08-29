@@ -595,6 +595,38 @@ export default function ImageResizer() {
           </div>
         </div>
 
+        {/* Resize Percentage Settings */}
+        {selectedFiles.length > 0 && (
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-700/20">
+            <h3 className="text-xl font-bold text-white mb-6">
+              Resize Settings
+            </h3>
+            <div className="space-y-6">
+              {/* Resize Percentage */}
+              <div>
+                <label className="block text-lg font-semibold text-gray-200 mb-4">
+                  Resize Percentage:{" "}
+                  <span className="text-green-400">{resizeValue}%</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    value={resizeValue}
+                    onChange={(e) => setResizeValue(parseInt(e.target.value))}
+                    className="w-full h-3 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-sm text-gray-400 mt-2">
+                    <span>1%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* File List */}
         {selectedFiles.length > 0 && (
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-700/20">
@@ -729,35 +761,13 @@ export default function ImageResizer() {
           </div>
         )}
 
-        {/* Settings */}
+        {/* Output Format Settings */}
         {selectedFiles.length > 0 && (
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-700/20">
             <h3 className="text-xl font-bold text-white mb-6">
-              Resize Settings
+              Output Settings
             </h3>
-            <div className="space-y-8">
-              {/* Resize Percentage */}
-              <div>
-                <label className="block text-lg font-semibold text-gray-200 mb-4">
-                  Resize Percentage:{" "}
-                  <span className="text-green-400">{resizeValue}%</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="range"
-                    min={1}
-                    max={100}
-                    value={resizeValue}
-                    onChange={(e) => setResizeValue(parseInt(e.target.value))}
-                    className="w-full h-3 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full appearance-none cursor-pointer slider"
-                  />
-                  <div className="flex justify-between text-sm text-gray-400 mt-2">
-                    <span>1%</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-              </div>
-
+            <div className="space-y-6">
               {/* Output Format */}
               <div>
                 <label className="block text-lg font-semibold text-gray-200 mb-4">
@@ -823,7 +833,14 @@ export default function ImageResizer() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
 
+        {/* Download Mode and Resize Button */}
+        {selectedFiles.length > 0 && (
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-700/20">
+            <div className="space-y-8">
               {/* Download Mode */}
               <div>
                 <label className="block text-lg font-semibold text-gray-200 mb-4">
