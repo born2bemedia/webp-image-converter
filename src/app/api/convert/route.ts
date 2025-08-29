@@ -9,23 +9,23 @@ export async function POST(request: NextRequest) {
 
     if (!files || files.length === 0) {
       return NextResponse.json(
-        { error: 'Файли не знайдені' },
+        { error: 'Files not found' },
         { status: 400 }
       );
     }
 
-    // Перевіряємо типи файлів
+    // Check file types
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
     
     if (invalidFiles.length > 0) {
       return NextResponse.json(
-        { error: `Непідтримувані формати файлів: ${invalidFiles.map(f => f.name).join(', ')}. Підтримуються тільки JPEG, JPG та PNG` },
+        { error: `Unsupported file formats: ${invalidFiles.map(f => f.name).join(', ')}. Only JPEG, JPG and PNG are supported` },
         { status: 400 }
       );
     }
 
-    // Обробляємо всі файли
+    // Process all files
     const results = await Promise.all(
       files.map(async (file) => {
         try {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         } catch (error) {
           return {
             originalName: file.name,
-            error: error instanceof Error ? error.message : 'Помилка конвертації'
+            error: error instanceof Error ? error.message : 'Conversion error'
           };
         }
       })
@@ -61,9 +61,9 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Помилка конвертації:', error);
+    console.error('Conversion error:', error);
     return NextResponse.json(
-      { error: `Помилка при конвертації зображень: ${error instanceof Error ? error.message : 'Невідома помилка'}` },
+      { error: `Error converting images: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }
