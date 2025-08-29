@@ -42,7 +42,7 @@ export default function ImageConverter() {
         return;
       }
       
-      setSelectedFiles(files);
+      setSelectedFiles(prev => [...prev, ...files]);
       setError(null);
       setResult(null);
       setConversionProgress(0);
@@ -230,8 +230,7 @@ export default function ImageConverter() {
         return;
       }
       
-      setSelectedFiles(files);
-      setError(null);
+      setSelectedFiles(prev => [...prev, ...files]);
       setResult(null);
       setConversionProgress(0);
     }

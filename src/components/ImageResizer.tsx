@@ -69,7 +69,7 @@ export default function ImageResizer() {
         return;
       }
 
-      setSelectedFiles(files);
+      setSelectedFiles(prev => [...prev, ...files]);
       setError(null);
       setResult(null);
       setResizeProgress(0);
@@ -86,7 +86,7 @@ export default function ImageResizer() {
           console.error(`Failed to get dimensions for ${file.name}:`, error);
         }
       }
-      setFileDimensions(dimensions);
+      setFileDimensions(prev => ({ ...prev, ...dimensions }));
       setIsLoadingDimensions(false);
     }
   };
@@ -375,7 +375,7 @@ export default function ImageResizer() {
         return;
       }
 
-      setSelectedFiles(files);
+      setSelectedFiles(prev => [...prev, ...files]);
       setError(null);
       setResult(null);
       setResizeProgress(0);
@@ -392,7 +392,7 @@ export default function ImageResizer() {
           console.error(`Failed to get dimensions for ${file.name}:`, error);
         }
       }
-      setFileDimensions(dimensions);
+      setFileDimensions(prev => ({ ...prev, ...dimensions }));
       setIsLoadingDimensions(false);
     }
   };
